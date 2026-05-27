@@ -16,6 +16,12 @@ public class User {
     @Column(nullable = false, length = 100)
     private String password;
 
+    @Column(name = "security_question", length = 100)
+    private String securityQuestion;
+
+    @Column(name = "security_answer", length = 100)
+    private String securityAnswer;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -25,6 +31,10 @@ public class User {
     public void setUsername(String username) { this.username = username; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    public String getSecurityQuestion() { return securityQuestion; }
+    public void setSecurityQuestion(String securityQuestion) { this.securityQuestion = securityQuestion; }
+    public String getSecurityAnswer() { return securityAnswer; }
+    public void setSecurityAnswer(String securityAnswer) { this.securityAnswer = securityAnswer; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

@@ -9,10 +9,10 @@ export const useGameStore = defineStore('game', () => {
   async function fetchProgress() {
     try {
       const res = await api.get('/api/game/progress')
-      currentLevel.value = res.data.currentLevel
-      highScore.value = res.data.highScore
+      currentLevel.value = res.data.data.currentLevel
+      highScore.value = res.data.data.highScore
     } catch {
-      // ignore
+      // use defaults
     }
   }
 
@@ -22,10 +22,10 @@ export const useGameStore = defineStore('game', () => {
         currentLevel: level,
         highScore: score
       })
-      currentLevel.value = res.data.currentLevel
-      highScore.value = res.data.highScore
+      currentLevel.value = res.data.data.currentLevel
+      highScore.value = res.data.data.highScore
     } catch {
-      // ignore
+      // silent fail
     }
   }
 

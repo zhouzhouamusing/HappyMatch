@@ -12,6 +12,7 @@ body {
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 button {
@@ -29,7 +30,152 @@ input {
 
 #app {
   min-height: 100vh;
+  position: relative;
+}
+
+/* Shared animated background */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-gradient);
+  overflow: hidden;
+  z-index: 0;
+}
+
+.page-bg::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 20% 50%, rgba(167, 139, 250, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(244, 114, 182, 0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(96, 165, 250, 0.05) 0%, transparent 50%);
+  animation: bgShift 20s ease-in-out infinite;
+}
+
+@keyframes bgShift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(2%, -1%) rotate(1deg); }
+  66% { transform: translate(-1%, 2%) rotate(-1deg); }
+}
+
+/* Floating particles container */
+.floating-fruits {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.floating-fruit {
+  position: absolute;
+  font-size: 24px;
+  opacity: 0.15;
+  animation: floatUp linear infinite;
+  will-change: transform;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(100vh) rotate(0deg) scale(0.8);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.15;
+  }
+  90% {
+    opacity: 0.15;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Page content wrapper */
+.page-content {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+}
+
+/* Card glass effect */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Page transition */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.98);
+}
+
+/* Shimmer effect for buttons */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.btn-shimmer {
+  background-size: 200% auto;
+  background-image: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 50%, var(--primary) 100%);
+  animation: shimmer 3s linear infinite;
+}
+
+/* Toast notification styles */
+.toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--shadow);
+}
+
+.toast.success {
+  background: var(--success-light);
+  color: #065f46;
+  border: 1px solid var(--success);
+}
+
+.toast.error {
+  background: var(--danger-light);
+  color: #991b1b;
+  border: 1px solid var(--danger);
+}
+
+@keyframes toastIn {
+  0% { transform: translateX(-50%) translateY(-20px) scale(0.9); opacity: 0; }
+  100% { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
 }

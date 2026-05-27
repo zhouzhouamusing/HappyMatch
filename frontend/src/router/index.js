@@ -8,6 +8,11 @@ const routes = [
     component: () => import('../views/LoginView.vue')
   },
   {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: () => import('../views/ForgotPasswordView.vue')
+  },
+  {
     path: '/',
     name: 'Game',
     component: () => import('../views/GameView.vue'),
@@ -23,7 +28,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
 
-  if (!userStore.user && to.meta.requiresAuth) {
+  if (to.meta.requiresAuth && !userStore.user) {
     try {
       await userStore.fetchMe()
       if (!userStore.user) {

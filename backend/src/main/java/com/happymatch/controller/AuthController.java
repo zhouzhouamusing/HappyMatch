@@ -2,13 +2,16 @@ package com.happymatch.controller;
 
 import com.happymatch.dto.LoginRequest;
 import com.happymatch.dto.RegisterRequest;
+import com.happymatch.dto.ResetPasswordRequest;
 import com.happymatch.entity.User;
+import com.happymatch.exception.BusinessException;
 import com.happymatch.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -21,50 +24,73 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request, HttpSession session) {
-        try {
-            User user = userService.register(request);
-            session.setAttribute("userId", user.getId());
-            return ResponseEntity.ok(Map.of(
-                    "id", user.getId(),
-                    "username", user.getUsername()
-            ));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        }
+    public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request, HttpSession session) {
+        User user = userService.register(request);
+        session.setAttribute("userId", user.getId());
+        session.setMaxInactiveInterval(1800);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", true);
+        body.put("data", Map.of("id", user.getId(), "username", user.getUsername()));
+        return ResponseEntity.ok(body);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpSession session) {
-        try {
-            User user = userService.login(request);
-            session.setAttribute("userId", user.getId());
-            return ResponseEntity.ok(Map.of(
-                    "id", user.getId(),
-                    "username", user.getUsername()
-            ));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request, HttpSession session) {
+        User user = userService.login(request);
+        session.setAttribute("userId", user.getId());
+
+        if (request.isRememberMe()) {
+            session.setMaxInactiveInterval(7 * 24 * 3600);
+        } else {
+            session.setMaxInactiveInterval(1800);
         }
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", true);
+        body.put("data", Map.of("id", user.getId(), "username", user.getUsername()));
+        return ResponseEntity.ok(body);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> me(HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "未登录"));
+            throw new BusinessException(401, "未登录，请先登录");
         }
-        return userService.findById(userId)
-                .map(user -> ResponseEntity.ok(Map.of(
-                        "id", user.getId(),
-                        "username", user.getUsername()
-                )))
-                .orElse(ResponseEntity.status(401).body(Map.of("message", "用户不存在")));
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new BusinessException(401, "用户不存在，请重新登录"));
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", true);
+        body.put("data", Map.of("id", user.getId(), "username", user.getUsername()));
+        return ResponseEntity.ok(body);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> logout(HttpSession session) {
         session.invalidate();
-        return ResponseEntity.ok(Map.of("message", "已登出"));
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", true);
+        body.put("message", "已成功登出");
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/security-question")
+    public ResponseEntity<Map<String, Object>> getSecurityQuestion(@RequestParam String username) {
+        String question = userService.getSecurityQuestion(username);
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", true);
+        body.put("data", Map.of("securityQuestion", question));
+        return ResponseEntity.ok(body);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(request);
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", true);
+        body.put("message", "密码重置成功，请使用新密码登录");
+        return ResponseEntity.ok(body);
     }
 }
