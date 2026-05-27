@@ -163,7 +163,8 @@ async function handleGetQuestion() {
     securityQuestion.value = question
     step.value = 2
   } catch (e) {
-    const msg = e.response?.data?.message || '用户不存在'
+    const data = e.response?.data
+    const msg = data?.message || '查询失败，请检查网络连接'
     showToast(msg)
   } finally {
     loading.value = false
@@ -202,7 +203,8 @@ async function handleReset() {
     })
     step.value = 3
   } catch (e) {
-    const msg = e.response?.data?.message || '重置失败，请重试'
+    const data = e.response?.data
+    const msg = data?.message || '重置失败，请检查网络连接'
     showToast(msg)
   } finally {
     loading.value = false

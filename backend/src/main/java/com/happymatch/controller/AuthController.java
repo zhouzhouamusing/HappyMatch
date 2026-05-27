@@ -4,7 +4,6 @@ import com.happymatch.dto.LoginRequest;
 import com.happymatch.dto.RegisterRequest;
 import com.happymatch.dto.ResetPasswordRequest;
 import com.happymatch.entity.User;
-import com.happymatch.exception.BusinessException;
 import com.happymatch.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -54,12 +53,17 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> me(HttpSession session) {
+        // AuthFilter already guarantees userId is present for protected endpoints
         Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            throw new BusinessException(401, "未登录，请先登录");
+        User user = userService.findById(userId).orElse(null);
+        if (user == null) {
+            session.invalidate();
+            Map<String, Object> body = new HashMap<>();
+            body.put("success", false);
+            body.put("code", 401);
+            body.put("message", "用户不存在，请重新登录");
+            return ResponseEntity.status(401).body(body);
         }
-        User user = userService.findById(userId)
-                .orElseThrow(() -> new BusinessException(401, "用户不存在，请重新登录"));
 
         Map<String, Object> body = new HashMap<>();
         body.put("success", true);

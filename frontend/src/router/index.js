@@ -5,12 +5,14 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/LoginView.vue')
+    component: () => import('../views/LoginView.vue'),
+    meta: { guest: true }
   },
   {
     path: '/forgot-password',
     name: 'ForgotPassword',
-    component: () => import('../views/ForgotPasswordView.vue')
+    component: () => import('../views/ForgotPasswordView.vue'),
+    meta: { guest: true }
   },
   {
     path: '/',
@@ -28,20 +30,40 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
 
-  if (to.meta.requiresAuth && !userStore.user) {
-    try {
-      await userStore.fetchMe()
-      if (!userStore.user) {
-        next('/login')
-        return
-      }
-    } catch {
-      next('/login')
+  if (to.meta.requiresAuth) {
+    // If user already in memory, proceed
+    if (userStore.user) {
+      next()
       return
     }
+
+    // Try to restore session from server
+    const loggedIn = await userStore.fetchMe()
+    if (loggedIn) {
+      next()
+      return
+    }
+
+    // Try auto-login with remembered credentials
+    const remembered = userStore.getRememberedCredentials()
+    if (remembered) {
+      try {
+        await userStore.login(remembered.username, remembered.password, true)
+        next()
+        return
+      } catch {
+        // Credentials no longer valid, clear them
+        userStore.clearRememberedCredentials()
+      }
+    }
+
+    // No valid session, redirect to login
+    next('/login')
+    return
   }
 
-  if (to.path === '/login' && userStore.user) {
+  // If going to login but already authenticated, redirect to game
+  if (to.meta.guest && userStore.user) {
     next('/')
     return
   }

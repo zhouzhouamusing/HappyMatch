@@ -193,9 +193,10 @@ const focuses = reactive({})
 const toast = reactive({ show: false, message: '', type: 'error' })
 
 onMounted(() => {
-  const remembered = userStore.getRememberedUser()
+  const remembered = userStore.getRememberedCredentials()
   if (remembered) {
-    loginForm.username = remembered
+    loginForm.username = remembered.username
+    loginForm.password = remembered.password
     loginForm.rememberMe = true
   }
 })
@@ -253,9 +254,10 @@ async function handleLogin() {
   try {
     await userStore.login(loginForm.username.trim(), loginForm.password, loginForm.rememberMe)
     showToast('登录成功！', 'success')
-    setTimeout(() => router.push('/'), 500)
+    setTimeout(() => router.push('/'), 400)
   } catch (e) {
-    const msg = e.response?.data?.message || '登录失败，请重试'
+    const data = e.response?.data
+    const msg = data?.message || '登录失败，请检查网络连接'
     showToast(msg)
   } finally {
     loading.value = false
@@ -286,9 +288,10 @@ async function handleRegister() {
       securityAnswer: registerForm.securityAnswer.trim()
     })
     showToast('注册成功！', 'success')
-    setTimeout(() => router.push('/'), 500)
+    setTimeout(() => router.push('/'), 400)
   } catch (e) {
-    const msg = e.response?.data?.message || '注册失败，请重试'
+    const data = e.response?.data
+    const msg = data?.message || '注册失败，请检查网络连接'
     showToast(msg)
   } finally {
     loading.value = false
