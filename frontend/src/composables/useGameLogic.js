@@ -830,6 +830,27 @@ export function useGameLogic() {
     }, 450)
   }
 
+  async function hammerDestroy(row, col) {
+    if (!grid.value[row][col].fruit || isProcessing.value || gameStatus.value !== 'playing') return
+    isProcessing.value = true
+    grid.value[row][col].state = 'eliminating'
+    await delay(450)
+    grid.value[row][col].fruit = null
+    grid.value[row][col].special = null
+    grid.value[row][col].state = 'idle'
+    await applyGravity()
+    await fillEmpty()
+    const matches = findMatches()
+    if (matches.length > 0) {
+      comboCount.value = 0
+      const groups = findMatchGroupsWithDirection()
+      await processMatches(matches, groups, null)
+    }
+    checkGameStatus()
+    isProcessing.value = false
+    resetHintTimer()
+  }
+
   function cleanup() {
     stopHintTimer()
     stopSpecialSpawnTimer()
@@ -854,6 +875,8 @@ export function useGameLogic() {
     LEVELS,
     startLevel,
     selectCell,
+    shuffleBoard,
+    hammerDestroy,
     cleanup
   }
 }

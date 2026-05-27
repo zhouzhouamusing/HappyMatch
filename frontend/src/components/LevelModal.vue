@@ -15,6 +15,10 @@
         <div class="modal-stars" v-if="type === 'won'">
           <span v-for="i in 3" :key="i" class="star" :class="{ filled: getStars() >= i }">⭐</span>
         </div>
+        <div v-if="type === 'won' && coinsEarned > 0" class="coins-reward">
+          <span class="coins-reward-icon">🪙</span>
+          <span class="coins-reward-text">+{{ coinsEarned }} 金币</span>
+        </div>
         <div class="modal-actions">
           <button v-if="type === 'won' && currentLevel < totalLevels" class="btn-primary" @click="$emit('next')">
             下一关 →
@@ -38,7 +42,8 @@ const props = defineProps({
   score: Number,
   targetScore: Number,
   currentLevel: Number,
-  totalLevels: { type: Number, default: 10 }
+  totalLevels: { type: Number, default: 50 },
+  coinsEarned: { type: Number, default: 0 }
 })
 defineEmits(['close', 'next', 'retry'])
 
@@ -142,7 +147,7 @@ function getStars() {
 }
 
 .modal-stars {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   display: flex;
   justify-content: center;
   gap: 8px;
@@ -165,6 +170,33 @@ function getStars() {
 @keyframes starPop {
   0% { transform: scale(0); }
   100% { transform: scale(1); }
+}
+
+.coins-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fde68a;
+  animation: coinsPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+@keyframes coinsPop {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.coins-reward-icon {
+  font-size: 18px;
+}
+
+.coins-reward-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #b45309;
 }
 
 .modal-actions {

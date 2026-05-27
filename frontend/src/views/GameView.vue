@@ -17,6 +17,27 @@
         </button>
       </div>
 
+      <!-- Resource bar -->
+      <div class="resource-bar glass-card">
+        <div class="coin-display">
+          <span class="coin-icon">🪙</span>
+          <span class="coin-amount">{{ gameStore.coins }}</span>
+        </div>
+        <StaminaBar
+          :stamina="gameStore.stamina"
+          :maxStamina="gameStore.maxStamina"
+          :recoverySeconds="gameStore.staminaRecoverySeconds"
+        />
+        <div class="action-btns">
+          <button class="action-btn shop-btn" @click="showShopModal = true">
+            🏪 商店
+          </button>
+          <button class="action-btn rank-btn" @click="showRankingModal = true">
+            🏆 排行
+          </button>
+        </div>
+      </div>
+
       <!-- Level selector -->
       <Transition name="panel-slide" mode="out-in">
         <div v-if="showLevelSelector" key="levels" class="level-panel glass-card">
@@ -24,6 +45,11 @@
             <span class="panel-icon">🍒</span>
             <h2 class="title-gradient">选择关卡</h2>
             <p class="panel-subtitle">消除水果，挑战高分 · 共 {{ LEVELS.length }} 关</p>
+          </div>
+
+          <!-- Stamina warning -->
+          <div v-if="gameStore.stamina < 2" class="stamina-warning">
+            ⚡ 体力不足，无法进入关卡
           </div>
 
           <!-- Difficulty tabs -->
@@ -47,9 +73,10 @@
               :class="{
                 locked: lv.level > unlockedLevel,
                 current: lv.level === unlockedLevel,
-                completed: lv.level < unlockedLevel
+                completed: lv.level < unlockedLevel,
+                'no-stamina': gameStore.stamina < 2 && lv.level <= unlockedLevel
               }"
-              :disabled="lv.level > unlockedLevel"
+              :disabled="lv.level > unlockedLevel || gameStore.stamina < 2"
               @click="enterLevel(lv.level)"
             >
               <span class="level-badge" :class="{ unlocked: lv.level <= unlockedLevel }">
@@ -66,7 +93,7 @@
         </div>
 
         <!-- Game area -->
-        <div v-else key="game" class="game-area glass-card">
+        <div v-else key="game" class="game-area glass-card" :class="{ 'hammer-cursor': hammerMode }">
           <GameHeader
             :currentLevel="currentLevel"
             :score="score"
@@ -76,12 +103,20 @@
           />
           <GameBoard
             :grid="grid"
-            @select="selectCell"
+            @select="handleCellSelect"
           />
           <div class="game-footer">
             <button class="back-btn" @click="backToLevels">
               ← 选关
             </button>
+            <SkillBar
+              :refreshCount="gameStore.refreshCount"
+              :hammerCount="gameStore.hammerCount"
+              :hammerMode="hammerMode"
+              :disabled="isProcessing || gameStatus !== 'playing'"
+              @use-refresh="handleUseRefresh"
+              @use-hammer="handleUseHammer"
+            />
             <Transition name="combo-pop">
               <div v-if="comboCount > 1" class="combo-display">
                 🔥 {{ comboCount }}x 连击！
@@ -90,6 +125,9 @@
             <div class="level-tag">
               第 {{ currentLevel }} 关
             </div>
+          </div>
+          <div v-if="hammerMode" class="hammer-hint">
+            🔨 点击任意水果击碎 · <button class="cancel-hammer" @click="hammerMode = false">取消</button>
           </div>
         </div>
       </Transition>
@@ -102,16 +140,34 @@
         :targetScore="targetScore"
         :currentLevel="currentLevel"
         :totalLevels="LEVELS.length"
+        :coinsEarned="coinsEarned"
         @next="handleNextLevel"
         @retry="handleRetry"
         @close="backToLevels"
+      />
+
+      <!-- Shop modal -->
+      <ShopModal
+        :show="showShopModal"
+        :coins="gameStore.coins"
+        :refreshCount="gameStore.refreshCount"
+        :hammerCount="gameStore.hammerCount"
+        @close="showShopModal = false"
+        @buy="handleBuyItem"
+      />
+
+      <!-- Ranking modal -->
+      <RankingModal
+        :show="showRankingModal"
+        :currentUsername="userStore.user?.username"
+        @close="showRankingModal = false"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { useGameStore } from '../stores/game'
@@ -120,6 +176,10 @@ import { resetAuthState } from '../router'
 import GameHeader from '../components/GameHeader.vue'
 import GameBoard from '../components/GameBoard.vue'
 import LevelModal from '../components/LevelModal.vue'
+import ShopModal from '../components/ShopModal.vue'
+import RankingModal from '../components/RankingModal.vue'
+import StaminaBar from '../components/StaminaBar.vue'
+import SkillBar from '../components/SkillBar.vue'
 import '../assets/styles/game.css'
 
 const router = useRouter()
@@ -129,16 +189,28 @@ const gameStore = useGameStore()
 const {
   grid, score, movesLeft, currentLevel,
   isProcessing, gameStatus, targetScore,
-  comboCount, LEVELS, startLevel, selectCell, cleanup
+  comboCount, LEVELS, startLevel, selectCell,
+  shuffleBoard, hammerDestroy, cleanup
 } = useGameLogic()
 
 onUnmounted(() => {
   cleanup()
+  gameStore.cleanup()
 })
 
 const showLevelSelector = ref(true)
 const unlockedLevel = ref(1)
 const activeTab = ref('all')
+const showShopModal = ref(false)
+const showRankingModal = ref(false)
+const hammerMode = ref(false)
+const coinsEarned = ref(0)
+
+watch(gameStatus, (val) => {
+  if (val === 'won') {
+    coinsEarned.value = getStars() * 10
+  }
+})
 
 const difficultyTabs = [
   { key: 'all', label: '全部', icon: '📋' },
@@ -163,31 +235,91 @@ onMounted(async () => {
   unlockedLevel.value = gameStore.currentLevel
 })
 
-function enterLevel(level) {
-  showLevelSelector.value = false
-  startLevel(level)
+async function enterLevel(level) {
+  try {
+    await gameStore.consumeStamina()
+    showLevelSelector.value = false
+    hammerMode.value = false
+    coinsEarned.value = 0
+    startLevel(level)
+  } catch (e) {
+    alert('体力不足，请等待恢复！')
+  }
 }
 
 function backToLevels() {
   showLevelSelector.value = true
   gameStatus.value = 'playing'
+  hammerMode.value = false
+}
+
+function getStars() {
+  if (!targetScore.value) return 0
+  const ratio = score.value / targetScore.value
+  if (ratio >= 1.5) return 3
+  if (ratio >= 1.2) return 2
+  return 1
 }
 
 async function handleNextLevel() {
   const nextLevel = currentLevel.value + 1
   if (nextLevel <= LEVELS.length) {
+    const stars = getStars()
     unlockedLevel.value = Math.max(unlockedLevel.value, nextLevel)
-    await gameStore.saveProgress(nextLevel, score.value)
-    startLevel(nextLevel)
+    await gameStore.saveProgress(nextLevel, score.value, stars)
+    try {
+      await gameStore.consumeStamina()
+      startLevel(nextLevel)
+    } catch {
+      backToLevels()
+    }
   }
 }
 
-function handleRetry() {
-  startLevel(currentLevel.value)
+async function handleRetry() {
+  coinsEarned.value = 0
+  try {
+    await gameStore.consumeStamina()
+    startLevel(currentLevel.value)
+  } catch {
+    backToLevels()
+  }
+}
+
+function handleCellSelect(row, col) {
+  if (hammerMode.value) {
+    hammerMode.value = false
+    gameStore.useSkill('hammer')
+    hammerDestroy(row, col)
+    return
+  }
+  selectCell(row, col)
+}
+
+async function handleUseRefresh() {
+  try {
+    await gameStore.useSkill('refresh')
+    shuffleBoard()
+  } catch {
+    alert('刷新技能数量不足！')
+  }
+}
+
+function handleUseHammer() {
+  hammerMode.value = !hammerMode.value
+}
+
+async function handleBuyItem(itemType) {
+  try {
+    await gameStore.buyItem(itemType)
+  } catch {
+    alert('金币不足！')
+  }
 }
 
 async function handleLogout() {
   cleanup()
+  gameStore.cleanup()
   await userStore.logout()
   resetAuthState()
   router.push('/login')
@@ -211,7 +343,7 @@ async function handleLogout() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   padding: 14px 20px;
 }
 
@@ -269,6 +401,71 @@ async function handleLogout() {
   border-color: var(--danger);
 }
 
+/* Resource bar */
+.resource-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.coin-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-radius: 10px;
+  border: 1px solid #fde68a;
+}
+
+.coin-icon {
+  font-size: 16px;
+}
+
+.coin-amount {
+  font-weight: 700;
+  color: #b45309;
+  font-size: 14px;
+}
+
+.action-btns {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border-light);
+  background: var(--bg);
+  color: var(--text);
+  transition: var(--transition-fast);
+  cursor: pointer;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.shop-btn:hover {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.rank-btn:hover {
+  border-color: var(--primary);
+  background: #faf5ff;
+  color: var(--primary-dark);
+}
+
 /* Level panel */
 .level-panel {
   padding: 28px 20px;
@@ -304,6 +501,19 @@ async function handleLogout() {
   font-size: 13px;
   color: var(--text-lighter);
   margin-top: 4px;
+}
+
+/* Stamina warning */
+.stamina-warning {
+  text-align: center;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* Difficulty tabs */
@@ -372,13 +582,13 @@ async function handleLogout() {
   transition: opacity 0.3s;
 }
 
-.level-btn:not(.locked):hover {
+.level-btn:not(.locked):not(.no-stamina):hover {
   border-color: var(--primary-light);
   transform: translateY(-3px);
   box-shadow: var(--shadow);
 }
 
-.level-btn:not(.locked):hover::after {
+.level-btn:not(.locked):not(.no-stamina):hover::after {
   opacity: 1;
 }
 
@@ -395,6 +605,11 @@ async function handleLogout() {
 
 .level-btn.locked {
   opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.level-btn.no-stamina {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -427,11 +642,17 @@ async function handleLogout() {
   padding: 20px;
 }
 
+.game-area.hammer-cursor {
+  cursor: crosshair;
+}
+
 .game-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .back-btn {
@@ -470,6 +691,28 @@ async function handleLogout() {
   background: linear-gradient(135deg, var(--primary-light), var(--primary));
   color: white;
   font-weight: 600;
+}
+
+.hammer-hint {
+  text-align: center;
+  margin-top: 10px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 1px solid #fca5a5;
+  font-size: 13px;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.cancel-hammer {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 13px;
 }
 
 /* Transitions */
