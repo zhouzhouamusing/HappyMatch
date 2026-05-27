@@ -156,6 +156,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { preloadGameView } from '../router'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -253,6 +254,7 @@ async function handleLogin() {
   loading.value = true
   try {
     await userStore.login(loginForm.username.trim(), loginForm.password, loginForm.rememberMe)
+    preloadGameView()
     showToast('登录成功！', 'success')
     setTimeout(() => router.push('/'), 400)
   } catch (e) {

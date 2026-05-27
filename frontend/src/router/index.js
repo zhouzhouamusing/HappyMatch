@@ -1,6 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
+const GameViewImport = () => import('../views/GameView.vue')
+
+export function preloadGameView() {
+  GameViewImport()
+}
+
 const routes = [
   {
     path: '/login',
@@ -17,7 +23,7 @@ const routes = [
   {
     path: '/',
     name: 'Game',
-    component: () => import('../views/GameView.vue'),
+    component: GameViewImport,
     meta: { requiresAuth: true }
   }
 ]
@@ -27,42 +33,42 @@ const router = createRouter({
   routes
 })
 
+let authChecked = null
+
+function ensureAuth(userStore) {
+  if (!authChecked) {
+    authChecked = (async () => {
+      if (userStore.user) return true
+      const loggedIn = await userStore.fetchMe()
+      if (loggedIn) return true
+      const remembered = userStore.getRememberedCredentials()
+      if (remembered) {
+        try {
+          await userStore.login(remembered.username, remembered.password, true)
+          return true
+        } catch {
+          userStore.clearRememberedCredentials()
+        }
+      }
+      return false
+    })()
+  }
+  return authChecked
+}
+
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
 
   if (to.meta.requiresAuth) {
-    // If user already in memory, proceed
     if (userStore.user) {
       next()
       return
     }
-
-    // Try to restore session from server
-    const loggedIn = await userStore.fetchMe()
-    if (loggedIn) {
-      next()
-      return
-    }
-
-    // Try auto-login with remembered credentials
-    const remembered = userStore.getRememberedCredentials()
-    if (remembered) {
-      try {
-        await userStore.login(remembered.username, remembered.password, true)
-        next()
-        return
-      } catch {
-        // Credentials no longer valid, clear them
-        userStore.clearRememberedCredentials()
-      }
-    }
-
-    // No valid session, redirect to login
-    next('/login')
+    const authed = await ensureAuth(userStore)
+    next(authed ? undefined : '/login')
     return
   }
 
-  // If going to login but already authenticated, redirect to game
   if (to.meta.guest && userStore.user) {
     next('/')
     return
@@ -70,5 +76,9 @@ router.beforeEach(async (to, from, next) => {
 
   next()
 })
+
+export function resetAuthState() {
+  authChecked = null
+}
 
 export default router

@@ -13,7 +13,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const EMOJIS = ['🍎', '🍊', '🍋', '🍇', '🍓', '🫐', '🍑', '🍒', '🌟', '💫']
+const EMOJIS = ['🍎', '🍊', '🍋', '🍇', '🍒', '🥝', '🍑', '🌟', '💫']
 const container = ref(null)
 const particles = ref([])
 

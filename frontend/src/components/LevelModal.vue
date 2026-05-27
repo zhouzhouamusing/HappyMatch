@@ -16,10 +16,10 @@
           <span v-for="i in 3" :key="i" class="star" :class="{ filled: getStars() >= i }">⭐</span>
         </div>
         <div class="modal-actions">
-          <button v-if="type === 'won' && currentLevel < 5" class="btn-primary" @click="$emit('next')">
+          <button v-if="type === 'won' && currentLevel < totalLevels" class="btn-primary" @click="$emit('next')">
             下一关 →
           </button>
-          <button v-if="type === 'won' && currentLevel >= 5" class="btn-primary" @click="$emit('close')">
+          <button v-if="type === 'won' && currentLevel >= totalLevels" class="btn-primary" @click="$emit('close')">
             全部通关 🏆
           </button>
           <button class="btn-secondary" @click="$emit('retry')">
@@ -37,7 +37,8 @@ const props = defineProps({
   type: String,
   score: Number,
   targetScore: Number,
-  currentLevel: Number
+  currentLevel: Number,
+  totalLevels: { type: Number, default: 10 }
 })
 defineEmits(['close', 'next', 'retry'])
 

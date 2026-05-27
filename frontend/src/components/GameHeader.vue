@@ -5,7 +5,7 @@
         <span class="header-icon">⭐</span>
         <div class="header-info">
           <span class="header-label">关卡</span>
-          <span class="header-value">{{ currentLevel }} / 5</span>
+          <span class="header-value">{{ currentLevel }} / {{ totalLevels }}</span>
         </div>
       </div>
       <div class="header-item score-item">
@@ -38,7 +38,8 @@ const props = defineProps({
   currentLevel: Number,
   score: Number,
   targetScore: Number,
-  movesLeft: Number
+  movesLeft: Number,
+  totalLevels: { type: Number, default: 10 }
 })
 
 const progressPercent = computed(() => {

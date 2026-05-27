@@ -21,7 +21,7 @@
       <Transition name="panel-slide" mode="out-in">
         <div v-if="showLevelSelector" key="levels" class="level-panel glass-card">
           <div class="level-panel-header">
-            <span class="panel-icon">🍓</span>
+            <span class="panel-icon">🍒</span>
             <h2 class="title-gradient">选择关卡</h2>
             <p class="panel-subtitle">消除水果，挑战高分</p>
           </div>
@@ -54,6 +54,7 @@
             :score="score"
             :targetScore="targetScore"
             :movesLeft="movesLeft"
+            :totalLevels="LEVELS.length"
           />
           <GameBoard
             :grid="grid"
@@ -82,6 +83,7 @@
         :score="score"
         :targetScore="targetScore"
         :currentLevel="currentLevel"
+        :totalLevels="LEVELS.length"
         @next="handleNextLevel"
         @retry="handleRetry"
         @close="backToLevels"
@@ -91,11 +93,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { useGameStore } from '../stores/game'
 import { useGameLogic } from '../composables/useGameLogic'
+import { resetAuthState } from '../router'
 import GameHeader from '../components/GameHeader.vue'
 import GameBoard from '../components/GameBoard.vue'
 import LevelModal from '../components/LevelModal.vue'
@@ -108,8 +111,12 @@ const gameStore = useGameStore()
 const {
   grid, score, movesLeft, currentLevel,
   isProcessing, gameStatus, targetScore,
-  comboCount, LEVELS, startLevel, selectCell
+  comboCount, LEVELS, startLevel, selectCell, cleanup
 } = useGameLogic()
+
+onUnmounted(() => {
+  cleanup()
+})
 
 const showLevelSelector = ref(true)
 const unlockedLevel = ref(1)
@@ -131,7 +138,7 @@ function backToLevels() {
 
 async function handleNextLevel() {
   const nextLevel = currentLevel.value + 1
-  if (nextLevel <= 5) {
+  if (nextLevel <= LEVELS.length) {
     unlockedLevel.value = Math.max(unlockedLevel.value, nextLevel)
     await gameStore.saveProgress(nextLevel, score.value)
     startLevel(nextLevel)
@@ -143,7 +150,9 @@ function handleRetry() {
 }
 
 async function handleLogout() {
+  cleanup()
   await userStore.logout()
+  resetAuthState()
   router.push('/login')
 }
 </script>
@@ -262,8 +271,11 @@ async function handleLogout() {
 
 .level-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .level-btn {
