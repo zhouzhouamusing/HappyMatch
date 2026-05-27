@@ -28,14 +28,18 @@
           :maxStamina="gameStore.maxStamina"
           :recoverySeconds="gameStore.staminaRecoverySeconds"
         />
-        <div class="action-btns">
-          <button class="action-btn shop-btn" @click="showShopModal = true">
-            🏪 商店
-          </button>
-          <button class="action-btn rank-btn" @click="showRankingModal = true">
-            🏆 排行
-          </button>
-        </div>
+      </div>
+
+      <!-- Feature buttons -->
+      <div class="feature-btns">
+        <button class="feature-btn shop-feature" @click="showShopModal = true">
+          <span class="feature-icon">🏪</span>
+          <span class="feature-label">商店</span>
+        </button>
+        <button class="feature-btn rank-feature" @click="showRankingModal = true">
+          <span class="feature-icon">🏆</span>
+          <span class="feature-label">排行</span>
+        </button>
       </div>
 
       <!-- Level selector -->
@@ -243,7 +247,7 @@ async function enterLevel(level) {
     coinsEarned.value = 0
     startLevel(level)
   } catch (e) {
-    alert('体力不足，请等待恢复！')
+    alert(e.message || '体力不足，请等待恢复！')
   }
 }
 
@@ -312,8 +316,8 @@ function handleUseHammer() {
 async function handleBuyItem(itemType) {
   try {
     await gameStore.buyItem(itemType)
-  } catch {
-    alert('金币不足！')
+  } catch (e) {
+    alert(e.message || '金币不足！')
   }
 }
 
@@ -405,17 +409,17 @@ async function handleLogout() {
 .resource-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 12px 20px;
 }
 
 .coin-display {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   background: linear-gradient(135deg, #fffbeb, #fef3c7);
   border-radius: 10px;
   border: 1px solid #fde68a;
@@ -431,39 +435,68 @@ async function handleLogout() {
   font-size: 14px;
 }
 
-.action-btns {
+/* Feature buttons */
+.feature-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.feature-btn {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  margin-left: auto;
-}
-
-.action-btn {
-  padding: 6px 12px;
-  border-radius: 10px;
-  font-size: 12px;
+  padding: 14px 20px;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  font-size: 15px;
   font-weight: 600;
-  border: 1px solid var(--border-light);
-  background: var(--bg);
-  color: var(--text);
-  transition: var(--transition-fast);
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.action-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+.feature-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-.shop-btn:hover {
+.feature-btn:active {
+  transform: translateY(0);
+}
+
+.feature-icon {
+  font-size: 22px;
+}
+
+.feature-label {
+  font-size: 15px;
+}
+
+.shop-feature {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.shop-feature:hover {
   border-color: #f59e0b;
-  background: #fffbeb;
-  color: #b45309;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2);
 }
 
-.rank-btn:hover {
-  border-color: var(--primary);
-  background: #faf5ff;
-  color: var(--primary-dark);
+.rank-feature {
+  background: linear-gradient(135deg, #faf5ff, #ede9fe);
+  border-color: #c4b5fd;
+  color: #5b21b6;
+}
+
+.rank-feature:hover {
+  border-color: #a78bfa;
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.2);
 }
 
 /* Level panel */

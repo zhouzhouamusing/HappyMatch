@@ -11,6 +11,7 @@ export const useGameStore = defineStore('game', () => {
   const staminaRecoverySeconds = ref(0)
   const refreshCount = ref(0)
   const hammerCount = ref(0)
+  const progressLoaded = ref(false)
 
   let staminaTimer = null
 
@@ -53,8 +54,9 @@ export const useGameStore = defineStore('game', () => {
     try {
       const res = await api.get('/api/game/progress')
       updateFromData(res.data.data)
+      progressLoaded.value = true
     } catch {
-      // use defaults
+      progressLoaded.value = false
     }
   }
 
@@ -72,18 +74,42 @@ export const useGameStore = defineStore('game', () => {
   }
 
   async function consumeStamina() {
-    const res = await api.post('/api/game/stamina/consume')
-    updateFromData(res.data.data)
+    if (progressLoaded.value && stamina.value < 2) {
+      throw new Error('体力不足，请等待恢复')
+    }
+    try {
+      const res = await api.post('/api/game/stamina/consume')
+      updateFromData(res.data.data)
+      progressLoaded.value = true
+    } catch (e) {
+      if (e.response?.data?.message) {
+        throw new Error(e.response.data.message)
+      }
+      // If the API is unavailable, still allow playing (deduct locally)
+      if (progressLoaded.value) {
+        stamina.value = Math.max(0, stamina.value - 2)
+      }
+    }
   }
 
   async function buyItem(itemType, quantity = 1) {
-    const res = await api.post('/api/game/shop/buy', { itemType, quantity })
-    updateFromData(res.data.data)
+    try {
+      const res = await api.post('/api/game/shop/buy', { itemType, quantity })
+      updateFromData(res.data.data)
+    } catch (e) {
+      const msg = e.response?.data?.message || '购买失败'
+      throw new Error(msg)
+    }
   }
 
   async function useSkill(skillType) {
-    const res = await api.post('/api/game/skill/use', { skillType })
-    updateFromData(res.data.data)
+    try {
+      const res = await api.post('/api/game/skill/use', { skillType })
+      updateFromData(res.data.data)
+    } catch (e) {
+      const msg = e.response?.data?.message || '使用失败'
+      throw new Error(msg)
+    }
   }
 
   async function fetchRanking() {
@@ -97,7 +123,7 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     currentLevel, highScore, coins, stamina, maxStamina,
-    staminaRecoverySeconds, refreshCount, hammerCount,
+    staminaRecoverySeconds, refreshCount, hammerCount, progressLoaded,
     fetchProgress, saveProgress, consumeStamina,
     buyItem, useSkill, fetchRanking, cleanup
   }
