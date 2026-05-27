@@ -61,8 +61,6 @@
                 <span>🎯 {{ lv.target }}分</span>
                 <span>👟 {{ lv.moves }}步</span>
               </div>
-              <span v-if="lv.level <= 10" class="fruit-count-tag tag-easy">4种</span>
-              <span v-else class="fruit-count-tag tag-normal">5种</span>
             </button>
           </div>
         </div>
@@ -422,26 +420,6 @@ async function handleLogout() {
   font-size: 10px;
   color: var(--text-lighter);
   margin-top: 2px;
-}
-
-.fruit-count-tag {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  font-size: 9px;
-  padding: 1px 5px;
-  border-radius: 8px;
-  font-weight: 600;
-}
-
-.tag-easy {
-  background: rgba(52, 211, 153, 0.15);
-  color: #059669;
-}
-
-.tag-normal {
-  background: rgba(251, 146, 60, 0.15);
-  color: #ea580c;
 }
 
 /* Game area */

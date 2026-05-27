@@ -192,20 +192,58 @@ export function useGameLogic() {
       const bombCell = cell1.special === 'bomb' ? cell1 : cell2
       const targetCell = cell1.special === 'bomb' ? cell2 : cell1
       const targetFruit = targetCell.fruit
+      const targetSpecial = targetCell.special
 
       await animateSwap(r1, c1, r2, c2)
       movesLeft.value--
       comboCount.value = 0
 
-      const toEliminate = []
+      const eliminateSet = new Set()
+      // Bomb effect: clear all of that fruit type
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
           if (grid.value[r][c].fruit === targetFruit) {
-            toEliminate.push({ row: r, col: c })
+            eliminateSet.add(`${r},${c}`)
           }
         }
       }
-      toEliminate.push({ row: bombCell.row, col: bombCell.col })
+      eliminateSet.add(`${bombCell.row},${bombCell.col}`)
+
+      // Line-clear effect: if target cell was a line-h or line-v, also trigger it
+      if (targetSpecial === 'line-h') {
+        for (let c = 0; c < COLS; c++) {
+          eliminateSet.add(`${targetCell.row},${c}`)
+        }
+      } else if (targetSpecial === 'line-v') {
+        for (let r = 0; r < ROWS; r++) {
+          eliminateSet.add(`${r},${targetCell.col}`)
+        }
+      }
+
+      // Also chain any line-clear specials caught in the elimination
+      const toProcess = Array.from(eliminateSet)
+      const processed = new Set(eliminateSet)
+      while (toProcess.length > 0) {
+        const key = toProcess.shift()
+        const [cr, cc] = key.split(',').map(Number)
+        const chainCell = grid.value[cr][cc]
+        if (chainCell.special === 'line-h' && !(cr === targetCell.row && cc === targetCell.col)) {
+          for (let c = 0; c < COLS; c++) {
+            const k = `${cr},${c}`
+            if (!processed.has(k)) { processed.add(k); eliminateSet.add(k); toProcess.push(k) }
+          }
+        } else if (chainCell.special === 'line-v' && !(cr === targetCell.row && cc === targetCell.col)) {
+          for (let r = 0; r < ROWS; r++) {
+            const k = `${r},${cc}`
+            if (!processed.has(k)) { processed.add(k); eliminateSet.add(k); toProcess.push(k) }
+          }
+        }
+      }
+
+      const toEliminate = Array.from(eliminateSet).map(k => {
+        const [r, c] = k.split(',').map(Number)
+        return { row: r, col: c }
+      })
 
       score.value += toEliminate.length * 20
 
