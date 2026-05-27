@@ -1,0 +1,18 @@
+:root {
+  --primary: #a78bfa;
+  --primary-light: #c4b5fd;
+  --primary-dark: #7c3aed;
+  --bg: #faf5ff;
+  --bg-card: #ffffff;
+  --text: #374151;
+  --text-light: #6b7280;
+  --border: #e9d5ff;
+  --success: #34d399;
+  --danger: #f87171;
+  --warning: #fbbf24;
+  --shadow: 0 4px 24px rgba(124, 58, 237, 0.1);
+  --shadow-sm: 0 2px 8px rgba(124, 58, 237, 0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-full: 50%;
+}
