@@ -2,19 +2,66 @@ import { ref, computed, onUnmounted } from 'vue'
 
 const ROWS = 8
 const COLS = 8
-const FRUITS = ['🍎', '🍊', '🍋', '🍇', '🍒', '🥝']
+const FRUITS_4 = ['🍎', '🍊', '🍋', '🍇']
+const FRUITS_5 = ['🍎', '🍊', '🍋', '🍇', '🍒']
 
 const LEVELS = [
-  { level: 1, target: 500, moves: 20, description: '入门关卡' },
-  { level: 2, target: 1000, moves: 18, description: '初级挑战' },
-  { level: 3, target: 1800, moves: 16, description: '中级闯关' },
-  { level: 4, target: 2800, moves: 15, description: '高级挑战' },
-  { level: 5, target: 4000, moves: 14, description: '终极考验' },
-  { level: 6, target: 5500, moves: 13, description: '勇者之路' },
-  { level: 7, target: 7200, moves: 12, description: '大师挑战' },
-  { level: 8, target: 9000, moves: 11, description: '传奇之战' },
-  { level: 9, target: 11000, moves: 10, description: '极限冲击' },
-  { level: 10, target: 13500, moves: 9, description: '王者巅峰' }
+  // 1-10: 入门 (4种水果, 较多步数)
+  { level: 1, target: 500, moves: 25, description: '初识水果' },
+  { level: 2, target: 700, moves: 24, description: '小试牛刀' },
+  { level: 3, target: 900, moves: 23, description: '渐入佳境' },
+  { level: 4, target: 1100, moves: 22, description: '触类旁通' },
+  { level: 5, target: 1400, moves: 21, description: '初级挑战' },
+  { level: 6, target: 1700, moves: 20, description: '步步为营' },
+  { level: 7, target: 2000, moves: 19, description: '更上层楼' },
+  { level: 8, target: 2400, moves: 18, description: '精益求精' },
+  { level: 9, target: 2800, moves: 18, description: '驾轻就熟' },
+  { level: 10, target: 3200, moves: 17, description: '入门毕业' },
+  // 11-20: 进阶 (5种水果)
+  { level: 11, target: 3500, moves: 20, description: '新的挑战' },
+  { level: 12, target: 3800, moves: 19, description: '五彩缤纷' },
+  { level: 13, target: 4200, moves: 19, description: '眼花缭乱' },
+  { level: 14, target: 4600, moves: 18, description: '心灵手巧' },
+  { level: 15, target: 5000, moves: 18, description: '百步穿杨' },
+  { level: 16, target: 5500, moves: 17, description: '稳扎稳打' },
+  { level: 17, target: 6000, moves: 17, description: '势如破竹' },
+  { level: 18, target: 6500, moves: 16, description: '游刃有余' },
+  { level: 19, target: 7000, moves: 16, description: '炉火纯青' },
+  { level: 20, target: 7500, moves: 15, description: '进阶达人' },
+  // 21-30: 中级
+  { level: 21, target: 8000, moves: 16, description: '中级开幕' },
+  { level: 22, target: 8500, moves: 15, description: '乘风破浪' },
+  { level: 23, target: 9000, moves: 15, description: '过关斩将' },
+  { level: 24, target: 9500, moves: 14, description: '一往无前' },
+  { level: 25, target: 10000, moves: 14, description: '半程英雄' },
+  { level: 26, target: 10500, moves: 14, description: '如日中天' },
+  { level: 27, target: 11000, moves: 13, description: '所向披靡' },
+  { level: 28, target: 11500, moves: 13, description: '锐不可当' },
+  { level: 29, target: 12000, moves: 13, description: '出类拔萃' },
+  { level: 30, target: 12500, moves: 12, description: '中级毕业' },
+  // 31-40: 较难
+  { level: 31, target: 13000, moves: 13, description: '高手之路' },
+  { level: 32, target: 13500, moves: 12, description: '逆水行舟' },
+  { level: 33, target: 14000, moves: 12, description: '披荆斩棘' },
+  { level: 34, target: 14500, moves: 11, description: '千锤百炼' },
+  { level: 35, target: 15000, moves: 11, description: '炉火纯青' },
+  { level: 36, target: 15500, moves: 11, description: '高手过招' },
+  { level: 37, target: 16000, moves: 10, description: '棋逢对手' },
+  { level: 38, target: 16500, moves: 10, description: '九死一生' },
+  { level: 39, target: 17000, moves: 10, description: '凤毛麟角' },
+  { level: 40, target: 17500, moves: 9, description: '高手毕业' },
+  // 41-45: 偏难
+  { level: 41, target: 18000, moves: 10, description: '极限挑战' },
+  { level: 42, target: 18500, moves: 9, description: '绝处逢生' },
+  { level: 43, target: 19000, moves: 9, description: '背水一战' },
+  { level: 44, target: 19500, moves: 8, description: '殊死搏斗' },
+  { level: 45, target: 20000, moves: 8, description: '置之死地' },
+  // 46-50: 最难
+  { level: 46, target: 20500, moves: 8, description: '王者之路' },
+  { level: 47, target: 21000, moves: 7, description: '至尊挑战' },
+  { level: 48, target: 21500, moves: 7, description: '巅峰对决' },
+  { level: 49, target: 22000, moves: 6, description: '传奇之巅' },
+  { level: 50, target: 23000, moves: 6, description: '消消乐之神' }
 ]
 
 export function useGameLogic() {
@@ -29,12 +76,19 @@ export function useGameLogic() {
   const comboCount = ref(0)
   const hintTimer = ref(null)
   const hintedCells = ref([])
+  const specialSpawnTimer = ref(null)
+  const movesSinceLastSpecial = ref(0)
 
   const levelConfig = computed(() => LEVELS[currentLevel.value - 1])
   const targetScore = computed(() => levelConfig.value.target)
 
+  function getFruits() {
+    return currentLevel.value <= 10 ? FRUITS_4 : FRUITS_5
+  }
+
   function randomFruit() {
-    return FRUITS[Math.floor(Math.random() * FRUITS.length)]
+    const fruits = getFruits()
+    return fruits[Math.floor(Math.random() * fruits.length)]
   }
 
   function createCell(row, col, fruit = null) {
@@ -86,8 +140,10 @@ export function useGameLogic() {
     gameStatus.value = 'playing'
     selectedCell.value = null
     comboCount.value = 0
+    movesSinceLastSpecial.value = 0
     initGrid()
     resetHintTimer()
+    startSpecialSpawnTimer()
   }
 
   function selectCell(row, col) {
@@ -171,6 +227,7 @@ export function useGameLogic() {
         await processMatches(newMatches, groups, null)
       }
       checkGameStatus()
+      movesSinceLastSpecial.value = 0
       isProcessing.value = false
       resetHintTimer()
       return
@@ -184,6 +241,7 @@ export function useGameLogic() {
     if (matches.length > 0) {
       movesLeft.value--
       comboCount.value = 0
+      movesSinceLastSpecial.value++
       const groups = findMatchGroupsWithDirection()
       await processMatches(matches, groups, { row: r1, col: c1 })
       checkGameStatus()
@@ -365,10 +423,8 @@ export function useGameLogic() {
 
     const spawnKeys = new Set(specialSpawns.map(s => `${s.row},${s.col}`))
 
-    // Expand matches if any matched cells have line-clear specials
     const expandedMatches = expandMatchesWithSpecials(matches)
 
-    // Calculate score
     let roundScore = 0
     const matchGroups = groupMatches(matches)
     for (const group of matchGroups) {
@@ -381,7 +437,6 @@ export function useGameLogic() {
     score.value += roundScore
     comboCount.value++
 
-    // Animate elimination
     for (const { row, col } of expandedMatches) {
       if (!spawnKeys.has(`${row},${col}`)) {
         grid.value[row][col].state = 'eliminating'
@@ -389,7 +444,6 @@ export function useGameLogic() {
     }
     await delay(400)
 
-    // Clear matched cells
     for (const { row, col } of expandedMatches) {
       if (!spawnKeys.has(`${row},${col}`)) {
         grid.value[row][col].fruit = null
@@ -398,11 +452,11 @@ export function useGameLogic() {
       }
     }
 
-    // Apply special spawns
     for (const spawn of specialSpawns) {
       grid.value[spawn.row][spawn.col].special = spawn.special
       grid.value[spawn.row][spawn.col].fruit = spawn.fruit
       grid.value[spawn.row][spawn.col].state = 'appearing'
+      movesSinceLastSpecial.value = 0
     }
     if (specialSpawns.length > 0) await delay(300)
     for (const spawn of specialSpawns) {
@@ -412,7 +466,6 @@ export function useGameLogic() {
     await applyGravity()
     await fillEmpty()
 
-    // Chain reaction
     const newMatches = findMatches()
     if (newMatches.length > 0) {
       const newGroups = findMatchGroupsWithDirection()
@@ -520,10 +573,75 @@ export function useGameLogic() {
     if (score.value >= targetScore.value) {
       gameStatus.value = 'won'
       stopHintTimer()
+      stopSpecialSpawnTimer()
     } else if (movesLeft.value <= 0) {
       gameStatus.value = 'lost'
       stopHintTimer()
+      stopSpecialSpawnTimer()
     }
+  }
+
+  // --- Random Special Spawn System ---
+
+  function startSpecialSpawnTimer() {
+    stopSpecialSpawnTimer()
+    scheduleRandomSpecial()
+  }
+
+  function stopSpecialSpawnTimer() {
+    if (specialSpawnTimer.value) {
+      clearTimeout(specialSpawnTimer.value)
+      specialSpawnTimer.value = null
+    }
+  }
+
+  function scheduleRandomSpecial() {
+    if (gameStatus.value !== 'playing') return
+    const interval = 8000 + Math.random() * 12000
+    specialSpawnTimer.value = setTimeout(() => {
+      trySpawnRandomSpecial()
+      scheduleRandomSpecial()
+    }, interval)
+  }
+
+  function trySpawnRandomSpecial() {
+    if (gameStatus.value !== 'playing' || isProcessing.value) return
+    if (movesSinceLastSpecial.value < 3) return
+
+    const normalCells = []
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (grid.value[r][c].fruit && !grid.value[r][c].special) {
+          normalCells.push({ row: r, col: c })
+        }
+      }
+    }
+    if (normalCells.length === 0) return
+
+    const target = normalCells[Math.floor(Math.random() * normalCells.length)]
+    const rand = Math.random()
+    let specialType
+    if (rand < 0.35) {
+      specialType = 'line-h'
+    } else if (rand < 0.7) {
+      specialType = 'line-v'
+    } else {
+      specialType = 'bomb'
+    }
+
+    if (specialType === 'bomb') {
+      grid.value[target.row][target.col].special = 'bomb'
+      grid.value[target.row][target.col].fruit = '💫'
+    } else {
+      grid.value[target.row][target.col].special = specialType
+    }
+    grid.value[target.row][target.col].state = 'appearing'
+    movesSinceLastSpecial.value = 0
+    setTimeout(() => {
+      if (grid.value[target.row]?.[target.col]?.state === 'appearing') {
+        grid.value[target.row][target.col].state = 'idle'
+      }
+    }, 450)
   }
 
   // --- Hint System ---
@@ -560,12 +678,10 @@ export function useGameLogic() {
           if (nr >= ROWS || nc >= COLS) continue
           if (!grid.value[r][c].fruit || !grid.value[nr][nc].fruit) continue
 
-          // Bomb can always swap
           if (grid.value[r][c].special === 'bomb' || grid.value[nr][nc].special === 'bomb') {
             return [{ row: r, col: c }, { row: nr, col: nc }]
           }
 
-          // Virtual swap
           const temp = grid.value[r][c].fruit
           grid.value[r][c].fruit = grid.value[nr][nc].fruit
           grid.value[nr][nc].fruit = temp
@@ -591,7 +707,7 @@ export function useGameLogic() {
       hintTimer.value = null
     }
     if (gameStatus.value !== 'playing') return
-    hintTimer.value = setTimeout(showHint, 15000)
+    hintTimer.value = setTimeout(showHint, 5000)
   }
 
   function showHint() {
@@ -637,7 +753,6 @@ export function useGameLogic() {
       }
     }
 
-    // Fisher-Yates shuffle
     for (let i = allFruits.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
       ;[allFruits[i], allFruits[j]] = [allFruits[j], allFruits[i]]
@@ -662,7 +777,6 @@ export function useGameLogic() {
           }
         }
       }
-      // Check if shuffle created matches or if still no moves
       const matches = findMatches()
       if (matches.length > 0) {
         const groups = findMatchGroupsWithDirection()
@@ -680,6 +794,7 @@ export function useGameLogic() {
 
   function cleanup() {
     stopHintTimer()
+    stopSpecialSpawnTimer()
   }
 
   function delay(ms) {

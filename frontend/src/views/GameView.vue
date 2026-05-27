@@ -23,19 +23,37 @@
           <div class="level-panel-header">
             <span class="panel-icon">🍒</span>
             <h2 class="title-gradient">选择关卡</h2>
-            <p class="panel-subtitle">消除水果，挑战高分</p>
+            <p class="panel-subtitle">消除水果，挑战高分 · 共 {{ LEVELS.length }} 关</p>
           </div>
+
+          <!-- Difficulty tabs -->
+          <div class="difficulty-tabs">
+            <button
+              v-for="tab in difficultyTabs"
+              :key="tab.key"
+              class="diff-tab"
+              :class="{ active: activeTab === tab.key }"
+              @click="activeTab = tab.key"
+            >
+              {{ tab.icon }} {{ tab.label }}
+            </button>
+          </div>
+
           <div class="level-grid">
             <button
-              v-for="lv in LEVELS"
+              v-for="lv in filteredLevels"
               :key="lv.level"
               class="level-btn"
-              :class="{ locked: lv.level > unlockedLevel, current: lv.level === unlockedLevel }"
+              :class="{
+                locked: lv.level > unlockedLevel,
+                current: lv.level === unlockedLevel,
+                completed: lv.level < unlockedLevel
+              }"
               :disabled="lv.level > unlockedLevel"
               @click="enterLevel(lv.level)"
             >
               <span class="level-badge" :class="{ unlocked: lv.level <= unlockedLevel }">
-                {{ lv.level > unlockedLevel ? '🔒' : `⭐` }}
+                {{ lv.level > unlockedLevel ? '🔒' : lv.level < unlockedLevel ? '✅' : '⭐' }}
               </span>
               <span class="level-num">第 {{ lv.level }} 关</span>
               <span class="level-desc">{{ lv.description }}</span>
@@ -43,6 +61,8 @@
                 <span>🎯 {{ lv.target }}分</span>
                 <span>👟 {{ lv.moves }}步</span>
               </div>
+              <span v-if="lv.level <= 10" class="fruit-count-tag tag-easy">4种</span>
+              <span v-else class="fruit-count-tag tag-normal">5种</span>
             </button>
           </div>
         </div>
@@ -93,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { useGameStore } from '../stores/game'
@@ -120,6 +140,25 @@ onUnmounted(() => {
 
 const showLevelSelector = ref(true)
 const unlockedLevel = ref(1)
+const activeTab = ref('all')
+
+const difficultyTabs = [
+  { key: 'all', label: '全部', icon: '📋' },
+  { key: 'easy', label: '入门', icon: '🌱' },
+  { key: 'medium', label: '进阶', icon: '🌟' },
+  { key: 'hard', label: '较难', icon: '🔥' },
+  { key: 'extreme', label: '极难', icon: '💀' }
+]
+
+const filteredLevels = computed(() => {
+  switch (activeTab.value) {
+    case 'easy': return LEVELS.filter(l => l.level <= 10)
+    case 'medium': return LEVELS.filter(l => l.level >= 11 && l.level <= 30)
+    case 'hard': return LEVELS.filter(l => l.level >= 31 && l.level <= 45)
+    case 'extreme': return LEVELS.filter(l => l.level >= 46)
+    default: return LEVELS
+  }
+})
 
 onMounted(async () => {
   await gameStore.fetchProgress()
@@ -234,12 +273,12 @@ async function handleLogout() {
 
 /* Level panel */
 .level-panel {
-  padding: 36px 28px;
+  padding: 28px 20px;
 }
 
 .level-panel-header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .panel-icon {
@@ -269,11 +308,45 @@ async function handleLogout() {
   margin-top: 4px;
 }
 
+/* Difficulty tabs */
+.difficulty-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.diff-tab {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg);
+  color: var(--text-light);
+  border: 1px solid var(--border-light);
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.diff-tab:hover {
+  border-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.diff-tab.active {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+}
+
 .level-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  max-height: 480px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  max-height: 420px;
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -282,8 +355,8 @@ async function handleLogout() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 22px 14px 18px;
+  gap: 4px;
+  padding: 16px 10px 14px;
   border-radius: var(--radius-sm);
   background: var(--bg);
   border: 2px solid transparent;
@@ -317,33 +390,58 @@ async function handleLogout() {
   box-shadow: var(--shadow-sm);
 }
 
+.level-btn.completed {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+}
+
 .level-btn.locked {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 .level-badge {
-  font-size: 24px;
+  font-size: 20px;
   margin-bottom: 2px;
 }
 
 .level-num {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--primary-dark);
 }
 
 .level-desc {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-light);
 }
 
 .level-meta {
   display: flex;
-  gap: 10px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 10px;
   color: var(--text-lighter);
-  margin-top: 4px;
+  margin-top: 2px;
+}
+
+.fruit-count-tag {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.tag-easy {
+  background: rgba(52, 211, 153, 0.15);
+  color: #059669;
+}
+
+.tag-normal {
+  background: rgba(251, 146, 60, 0.15);
+  color: #ea580c;
 }
 
 /* Game area */
