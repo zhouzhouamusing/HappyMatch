@@ -33,6 +33,11 @@ public class GameService {
                     newGp.setUserId(userId);
                     return gameProgressRepository.save(newGp);
                 });
+        if (gp.getLastStaminaTime() == null || gp.getLastStaminaTime().getYear() < 2020) {
+            gp.setLastStaminaTime(LocalDateTime.now());
+            gp.setUpdatedAt(LocalDateTime.now());
+            gameProgressRepository.save(gp);
+        }
         recoverStamina(gp);
         return gp;
     }
@@ -149,13 +154,26 @@ public class GameService {
 
     private void recoverStamina(GameProgress gp) {
         if (gp.getStamina() >= MAX_STAMINA) return;
-        long minutesElapsed = ChronoUnit.MINUTES.between(gp.getLastStaminaTime(), LocalDateTime.now());
+        LocalDateTime lastTime = gp.getLastStaminaTime();
+        if (lastTime == null || lastTime.getYear() < 2020) {
+            gp.setLastStaminaTime(LocalDateTime.now());
+            gp.setUpdatedAt(LocalDateTime.now());
+            gameProgressRepository.save(gp);
+            return;
+        }
+        long minutesElapsed = ChronoUnit.MINUTES.between(lastTime, LocalDateTime.now());
+        if (minutesElapsed < 0) {
+            gp.setLastStaminaTime(LocalDateTime.now());
+            gp.setUpdatedAt(LocalDateTime.now());
+            gameProgressRepository.save(gp);
+            return;
+        }
         int recovered = (int) (minutesElapsed / STAMINA_RECOVERY_MINUTES);
         if (recovered > 0) {
             int newStamina = Math.min(MAX_STAMINA, gp.getStamina() + recovered);
             gp.setStamina(newStamina);
             long usedMinutes = (long) recovered * STAMINA_RECOVERY_MINUTES;
-            gp.setLastStaminaTime(gp.getLastStaminaTime().plusMinutes(usedMinutes));
+            gp.setLastStaminaTime(lastTime.plusMinutes(usedMinutes));
             gp.setUpdatedAt(LocalDateTime.now());
             gameProgressRepository.save(gp);
         }
@@ -163,7 +181,10 @@ public class GameService {
 
     private int getSecondsUntilNextRecovery(GameProgress gp) {
         if (gp.getStamina() >= MAX_STAMINA) return 0;
-        long secondsElapsed = ChronoUnit.SECONDS.between(gp.getLastStaminaTime(), LocalDateTime.now());
+        LocalDateTime lastTime = gp.getLastStaminaTime();
+        if (lastTime == null || lastTime.getYear() < 2020) return STAMINA_RECOVERY_MINUTES * 60;
+        long secondsElapsed = ChronoUnit.SECONDS.between(lastTime, LocalDateTime.now());
+        if (secondsElapsed < 0) return STAMINA_RECOVERY_MINUTES * 60;
         int secondsInCycle = (int) (secondsElapsed % (STAMINA_RECOVERY_MINUTES * 60));
         return (STAMINA_RECOVERY_MINUTES * 60) - secondsInCycle;
     }

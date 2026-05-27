@@ -25,7 +25,7 @@ public class GameProgress {
     @Column(name = "stamina", nullable = false)
     private Integer stamina = 30;
 
-    @Column(name = "last_stamina_time", nullable = false)
+    @Column(name = "last_stamina_time", nullable = false, columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime lastStaminaTime = LocalDateTime.now();
 
     @Column(name = "refresh_count", nullable = false)
@@ -34,7 +34,7 @@ public class GameProgress {
     @Column(name = "hammer_count", nullable = false)
     private Integer hammerCount = 0;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     public Long getId() { return id; }
