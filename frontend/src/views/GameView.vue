@@ -112,10 +112,12 @@
           <div class="game-footer">
             <div class="ingame-actions">
               <button class="ingame-btn replay-btn" @click="handleInGameReplay" :disabled="isProcessing">
-                🔄 重玩
+                <span class="btn-icon">🔄</span>
+                <span class="btn-label">重玩</span>
               </button>
               <button class="ingame-btn exit-btn" @click="showExitConfirm = true" :disabled="isProcessing">
-                🚪 退出
+                <span class="btn-icon">🚪</span>
+                <span class="btn-label">退出</span>
               </button>
             </div>
             <SkillBar
@@ -480,22 +482,23 @@ async function handleSaveProfile({ nickname, avatar }) {
 .coin-display {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 8px;
+  padding: 8px 12px;
   background: linear-gradient(135deg, #fffbeb, #fef3c7);
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #fde68a;
+  min-width: 80px;
 }
 
 .coin-icon-styled {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: linear-gradient(145deg, #ffd700, #f5a623);
   border: 2px solid #d4920a;
-  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.2),
-              inset 0 2px 4px rgba(255,255,255,0.4),
-              0 2px 6px rgba(245, 166, 35, 0.4);
+  box-shadow: inset 0 -2px 3px rgba(0,0,0,0.2),
+              inset 0 2px 3px rgba(255,255,255,0.4),
+              0 1px 4px rgba(245, 166, 35, 0.4);
   position: relative;
   display: inline-block;
   flex-shrink: 0;
@@ -508,7 +511,7 @@ async function handleSaveProfile({ nickname, avatar }) {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   color: #8B6914;
   text-shadow: 0 1px 1px rgba(255,255,255,0.3);
@@ -775,41 +778,65 @@ async function handleSaveProfile({ nickname, avatar }) {
 
 .ingame-actions {
   display: flex;
-  gap: 6px;
+  gap: 10px;
 }
 
 .ingame-btn {
-  padding: 6px 12px;
-  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
-  border: 1px solid var(--border-light);
+  border: 2px solid var(--border-light);
   background: var(--bg);
-  color: var(--text-light);
+  color: var(--text);
   transition: var(--transition-fast);
   cursor: pointer;
+  position: relative;
+}
+
+.ingame-btn .btn-icon {
+  font-size: 16px;
+}
+
+.ingame-btn .btn-label {
+  font-size: 12px;
 }
 
 .ingame-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .ingame-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
-.replay-btn:hover:not(:disabled) {
+.replay-btn {
   background: linear-gradient(135deg, #eff6ff, #dbeafe);
   border-color: #93c5fd;
   color: #1d4ed8;
 }
 
-.exit-btn:hover:not(:disabled) {
+.replay-btn:hover:not(:disabled) {
+  border-color: #60a5fa;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.exit-btn {
   background: linear-gradient(135deg, #fef2f2, #fee2e2);
   border-color: #fca5a5;
   color: #dc2626;
+}
+
+.exit-btn:hover:not(:disabled) {
+  border-color: #f87171;
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .combo-display {
@@ -871,90 +898,152 @@ async function handleSaveProfile({ nickname, avatar }) {
 .exit-confirm-card {
   background: white;
   border-radius: 24px;
-  padding: 36px 30px 30px;
+  padding: 40px 32px 32px;
   max-width: 380px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(124, 58, 237, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.exit-confirm-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #a78bfa, #7c3aed, #ec4899, #7c3aed, #a78bfa);
+  background-size: 200% 100%;
+  animation: gradientShift 3s linear infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
 }
 
 .exit-confirm-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-  animation: iconBounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-size: 56px;
+  margin-bottom: 16px;
+  display: inline-block;
+  animation: iconBounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), iconFloat 2.5s ease-in-out infinite 0.6s;
 }
 
 @keyframes iconBounceIn {
-  0% { transform: scale(0); opacity: 0; }
-  60% { transform: scale(1.2); }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  50% { transform: scale(1.3) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 .exit-confirm-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  color: #5b21b6;
-  margin-bottom: 12px;
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 14px;
+  animation: titleSlideIn 0.4s ease-out 0.2s both;
+}
+
+@keyframes titleSlideIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .exit-confirm-text {
   font-size: 14px;
   color: #6b7280;
-  line-height: 1.7;
-  margin-bottom: 10px;
+  line-height: 1.8;
+  margin-bottom: 12px;
+  animation: fadeInUp 0.4s ease-out 0.3s both;
+}
+
+@keyframes fadeInUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .exit-confirm-encourage {
   font-size: 14px;
   color: #059669;
-  font-weight: 500;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  border-radius: 10px;
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  margin-bottom: 20px;
+  font-weight: 600;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border-radius: 12px;
+  border: 1.5px solid rgba(16, 185, 129, 0.3);
+  margin-bottom: 24px;
   display: inline-block;
+  animation: fadeInUp 0.4s ease-out 0.4s both, encouragePulse 2s ease-in-out infinite 1s;
+}
+
+@keyframes encouragePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.08); }
 }
 
 .exit-confirm-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  animation: fadeInUp 0.4s ease-out 0.5s both;
 }
 
 .btn-primary {
-  padding: 12px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #a78bfa, #7c3aed);
   color: white;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-secondary {
-  padding: 10px;
-  border-radius: 12px;
-  background: none;
-  border: 1px solid var(--border-light);
-  font-size: 13px;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border: 1.5px solid #fed7aa;
+  font-size: 14px;
+  font-weight: 600;
+  color: #c2410c;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-secondary:hover {
-  background: var(--bg);
+  transform: translateY(-1px);
+  border-color: #fb923c;
+  background: linear-gradient(135deg, #ffedd5, #fed7aa);
+  box-shadow: 0 4px 12px rgba(251, 146, 60, 0.2);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
 }
 
 .btn-danger-text {
-  color: #dc2626;
+  color: #c2410c;
 }
 
 /* Transitions */
@@ -989,19 +1078,29 @@ async function handleSaveProfile({ nickname, avatar }) {
 }
 
 .modal-enter-active {
-  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity 0.35s ease;
+}
+.modal-enter-active .exit-confirm-card {
+  animation: modalCardEnter 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 .modal-leave-active {
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
+}
+.modal-leave-active .exit-confirm-card {
+  animation: modalCardLeave 0.2s ease forwards;
 }
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
 }
-.modal-enter-from .exit-confirm-card {
-  transform: scale(0.85) translateY(20px);
+
+@keyframes modalCardEnter {
+  0% { transform: scale(0.7) translateY(30px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
-.modal-leave-to .exit-confirm-card {
-  transform: scale(0.95);
+
+@keyframes modalCardLeave {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.9) translateY(10px); opacity: 0; }
 }
 </style>
