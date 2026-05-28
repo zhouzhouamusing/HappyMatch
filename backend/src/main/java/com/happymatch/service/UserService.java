@@ -126,4 +126,22 @@ public class UserService {
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
+
+    @Transactional
+    public User updateProfile(Long userId, String nickname, String avatar) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("用户不存在"));
+
+        if (nickname != null) {
+            nickname = nickname.trim();
+            if (nickname.length() < 1 || nickname.length() > 15) {
+                throw new BusinessException("昵称长度为1-15个字符");
+            }
+            user.setNickname(nickname);
+        }
+        if (avatar != null && !avatar.isEmpty()) {
+            user.setAvatar(avatar);
+        }
+        return userRepository.save(user);
+    }
 }

@@ -7,7 +7,7 @@
           <span class="shop-icon">🏪</span>
           <h2 class="title-gradient">技能商店</h2>
           <div class="coin-display">
-            <span class="coin-icon">🪙</span>
+            <span class="coin-icon-styled"></span>
             <span class="coin-amount">{{ coins }}</span>
           </div>
         </div>
@@ -21,7 +21,7 @@
               <h3 class="item-name">刷新技能</h3>
               <p class="item-desc">重新打乱全场水果布局，破解死局</p>
               <div class="item-meta">
-                <span class="item-price">🪙 20</span>
+                <span class="item-price"><span class="coin-icon-sm"></span> 20</span>
                 <span class="item-owned">已拥有: {{ refreshCount }}</span>
               </div>
             </div>
@@ -42,7 +42,7 @@
               <h3 class="item-name">锤子技能</h3>
               <p class="item-desc">直接击碎任意单个水果，应对卡点难题</p>
               <div class="item-meta">
-                <span class="item-price">🪙 30</span>
+                <span class="item-price"><span class="coin-icon-sm"></span> 30</span>
                 <span class="item-owned">已拥有: {{ hammerCount }}</span>
               </div>
             </div>
@@ -146,6 +146,58 @@ defineEmits(['close', 'buy'])
   margin-bottom: 8px;
 }
 
+.coin-icon-styled {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffd700, #f5a623);
+  border: 2px solid #d4920a;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.2),
+              inset 0 2px 4px rgba(255,255,255,0.4),
+              0 2px 6px rgba(245, 166, 35, 0.4);
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.coin-icon-styled::after {
+  content: '$';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #8B6914;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+}
+
+.coin-icon-sm {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffd700, #f5a623);
+  border: 1.5px solid #d4920a;
+  box-shadow: inset 0 -1px 2px rgba(0,0,0,0.2),
+              inset 0 1px 2px rgba(255,255,255,0.4);
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+}
+
+.coin-icon-sm::after {
+  content: '$';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 900;
+  color: #8B6914;
+}
+
 .coin-display {
   display: inline-flex;
   align-items: center;
@@ -154,10 +206,6 @@ defineEmits(['close', 'buy'])
   background: linear-gradient(135deg, #fffbeb, #fef3c7);
   border-radius: 20px;
   border: 1px solid #fde68a;
-}
-
-.coin-icon {
-  font-size: 16px;
 }
 
 .coin-amount {

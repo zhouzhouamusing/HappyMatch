@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS `user` (
     `password` VARCHAR(100) NOT NULL,
     `security_question` VARCHAR(100) DEFAULT NULL,
     `security_answer` VARCHAR(100) DEFAULT NULL,
+    `nickname` VARCHAR(30) DEFAULT NULL,
+    `avatar` VARCHAR(10) DEFAULT '🙂',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX `idx_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

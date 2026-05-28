@@ -22,6 +22,12 @@ public class User {
     @Column(name = "security_answer", length = 100)
     private String securityAnswer;
 
+    @Column(length = 30)
+    private String nickname;
+
+    @Column(length = 10)
+    private String avatar = "🙂";
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -35,6 +41,10 @@ public class User {
     public void setSecurityQuestion(String securityQuestion) { this.securityQuestion = securityQuestion; }
     public String getSecurityAnswer() { return securityAnswer; }
     public void setSecurityAnswer(String securityAnswer) { this.securityAnswer = securityAnswer; }
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
+    public String getAvatar() { return avatar; }
+    public void setAvatar(String avatar) { this.avatar = avatar; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

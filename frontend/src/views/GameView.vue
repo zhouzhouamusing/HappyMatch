@@ -3,12 +3,12 @@
     <div class="game-container">
       <!-- Top bar -->
       <div class="top-bar glass-card">
-        <div class="user-info">
+        <div class="user-info" @click="showProfileModal = true" style="cursor: pointer;">
           <div class="user-avatar-wrap">
-            <span class="user-avatar">🙂</span>
+            <span class="user-avatar">{{ userStore.user?.avatar || '🙂' }}</span>
           </div>
           <div class="user-details">
-            <span class="user-name">{{ userStore.user?.username }}</span>
+            <span class="user-name">{{ userStore.user?.nickname || userStore.user?.username }}</span>
             <span class="user-score">最高分: {{ gameStore.highScore }}</span>
           </div>
         </div>
@@ -20,7 +20,7 @@
       <!-- Resource bar -->
       <div class="resource-bar glass-card">
         <div class="coin-display">
-          <span class="coin-icon">🪙</span>
+          <span class="coin-icon-styled"></span>
           <span class="coin-amount">{{ gameStore.coins }}</span>
         </div>
         <StaminaBar
@@ -110,9 +110,14 @@
             @select="handleCellSelect"
           />
           <div class="game-footer">
-            <button class="back-btn" @click="backToLevels">
-              ← 选关
-            </button>
+            <div class="ingame-actions">
+              <button class="ingame-btn replay-btn" @click="handleInGameReplay" :disabled="isProcessing">
+                🔄 重玩
+              </button>
+              <button class="ingame-btn exit-btn" @click="showExitConfirm = true" :disabled="isProcessing">
+                🚪 退出
+              </button>
+            </div>
             <SkillBar
               :refreshCount="gameStore.refreshCount"
               :hammerCount="gameStore.hammerCount"
@@ -166,6 +171,41 @@
         :currentUsername="userStore.user?.username"
         @close="showRankingModal = false"
       />
+
+      <!-- Profile modal -->
+      <ProfileModal
+        :show="showProfileModal"
+        :currentAvatar="userStore.user?.avatar || '🙂'"
+        :currentNickname="userStore.user?.nickname || ''"
+        @close="showProfileModal = false"
+        @save="handleSaveProfile"
+      />
+
+      <!-- Exit confirmation modal -->
+      <Transition name="modal">
+        <div v-if="showExitConfirm" class="modal-overlay" @click.self="showExitConfirm = false">
+          <div class="modal-card exit-confirm-card">
+            <div class="exit-confirm-icon">😊</div>
+            <h2 class="exit-confirm-title">确定要离开吗？</h2>
+            <p class="exit-confirm-text">
+              再坚持一下，胜利就在眼前！<br>
+              当前已获得 <strong>{{ score }}</strong> 分，距离目标还差
+              <strong>{{ Math.max(0, targetScore - score) }}</strong> 分
+            </p>
+            <p class="exit-confirm-encourage">
+              💪 你还有 <strong>{{ movesLeft }}</strong> 步可用，加油！
+            </p>
+            <div class="exit-confirm-actions">
+              <button class="btn-primary" @click="showExitConfirm = false">
+                继续挑战 ✨
+              </button>
+              <button class="btn-secondary btn-danger-text" @click="confirmExit">
+                确认退出
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -182,6 +222,7 @@ import GameBoard from '../components/GameBoard.vue'
 import LevelModal from '../components/LevelModal.vue'
 import ShopModal from '../components/ShopModal.vue'
 import RankingModal from '../components/RankingModal.vue'
+import ProfileModal from '../components/ProfileModal.vue'
 import StaminaBar from '../components/StaminaBar.vue'
 import SkillBar from '../components/SkillBar.vue'
 import '../assets/styles/game.css'
@@ -207,6 +248,8 @@ const unlockedLevel = ref(1)
 const activeTab = ref('all')
 const showShopModal = ref(false)
 const showRankingModal = ref(false)
+const showProfileModal = ref(false)
+const showExitConfirm = ref(false)
 const hammerMode = ref(false)
 const coinsEarned = ref(0)
 
@@ -328,6 +371,25 @@ async function handleLogout() {
   resetAuthState()
   router.push('/login')
 }
+
+function handleInGameReplay() {
+  coinsEarned.value = 0
+  startLevel(currentLevel.value)
+}
+
+function confirmExit() {
+  showExitConfirm.value = false
+  backToLevels()
+}
+
+async function handleSaveProfile({ nickname, avatar }) {
+  try {
+    await userStore.updateProfile(nickname, avatar)
+    showProfileModal.value = false
+  } catch (e) {
+    alert(e.response?.data?.message || '保存失败')
+  }
+}
 </script>
 
 <style scoped>
@@ -425,8 +487,31 @@ async function handleLogout() {
   border: 1px solid #fde68a;
 }
 
-.coin-icon {
-  font-size: 16px;
+.coin-icon-styled {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffd700, #f5a623);
+  border: 2px solid #d4920a;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.2),
+              inset 0 2px 4px rgba(255,255,255,0.4),
+              0 2px 6px rgba(245, 166, 35, 0.4);
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.coin-icon-styled::after {
+  content: '$';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #8B6914;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.3);
 }
 
 .coin-amount {
@@ -688,20 +773,43 @@ async function handleLogout() {
   gap: 8px;
 }
 
-.back-btn {
-  padding: 8px 16px;
-  border-radius: var(--radius-xs);
-  background: var(--bg);
-  color: var(--text-light);
-  font-size: 13px;
-  font-weight: 500;
-  border: 1px solid var(--border-light);
-  transition: var(--transition-fast);
+.ingame-actions {
+  display: flex;
+  gap: 6px;
 }
 
-.back-btn:hover {
-  background: var(--border-light);
-  color: var(--text);
+.ingame-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border-light);
+  background: var(--bg);
+  color: var(--text-light);
+  transition: var(--transition-fast);
+  cursor: pointer;
+}
+
+.ingame-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.ingame-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.replay-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.exit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-color: #fca5a5;
+  color: #dc2626;
 }
 
 .combo-display {
@@ -748,6 +856,107 @@ async function handleLogout() {
   font-size: 13px;
 }
 
+/* Exit confirmation modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.exit-confirm-card {
+  background: white;
+  border-radius: 24px;
+  padding: 36px 30px 30px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+}
+
+.exit-confirm-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  animation: iconBounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes iconBounceIn {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.exit-confirm-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #5b21b6;
+  margin-bottom: 12px;
+}
+
+.exit-confirm-text {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.exit-confirm-encourage {
+  font-size: 14px;
+  color: #059669;
+  font-weight: 500;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-radius: 10px;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.exit-confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-primary {
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+}
+
+.btn-secondary {
+  padding: 10px;
+  border-radius: 12px;
+  background: none;
+  border: 1px solid var(--border-light);
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-secondary:hover {
+  background: var(--bg);
+}
+
+.btn-danger-text {
+  color: #dc2626;
+}
+
 /* Transitions */
 .panel-slide-enter-active {
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -777,5 +986,22 @@ async function handleLogout() {
 .combo-pop-leave-to {
   opacity: 0;
   transform: scale(1.3);
+}
+
+.modal-enter-active {
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-leave-active {
+  transition: all 0.2s ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+.modal-enter-from .exit-confirm-card {
+  transform: scale(0.85) translateY(20px);
+}
+.modal-leave-to .exit-confirm-card {
+  transform: scale(0.95);
 }
 </style>

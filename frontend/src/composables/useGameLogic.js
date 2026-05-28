@@ -7,61 +7,61 @@ const FRUITS_5 = ['🍎', '🍊', '🍋', '🍇', '🍒']
 
 const LEVELS = [
   // 1-10: 入门 (4种水果, 较多步数)
-  { level: 1, target: 500, moves: 25, description: '初识水果' },
-  { level: 2, target: 700, moves: 24, description: '小试牛刀' },
-  { level: 3, target: 900, moves: 23, description: '渐入佳境' },
-  { level: 4, target: 1100, moves: 22, description: '触类旁通' },
-  { level: 5, target: 1400, moves: 21, description: '初级挑战' },
-  { level: 6, target: 1700, moves: 20, description: '步步为营' },
-  { level: 7, target: 2000, moves: 19, description: '更上层楼' },
-  { level: 8, target: 2400, moves: 18, description: '精益求精' },
-  { level: 9, target: 2800, moves: 18, description: '驾轻就熟' },
-  { level: 10, target: 3200, moves: 17, description: '入门毕业' },
+  { level: 1, target: 500, moves: 30, description: '初识水果' },
+  { level: 2, target: 700, moves: 29, description: '小试牛刀' },
+  { level: 3, target: 900, moves: 28, description: '渐入佳境' },
+  { level: 4, target: 1100, moves: 27, description: '触类旁通' },
+  { level: 5, target: 1400, moves: 26, description: '初级挑战' },
+  { level: 6, target: 1700, moves: 25, description: '步步为营' },
+  { level: 7, target: 2000, moves: 24, description: '更上层楼' },
+  { level: 8, target: 2400, moves: 23, description: '精益求精' },
+  { level: 9, target: 2800, moves: 23, description: '驾轻就熟' },
+  { level: 10, target: 3200, moves: 22, description: '入门毕业' },
   // 11-20: 进阶 (5种水果)
-  { level: 11, target: 3500, moves: 20, description: '新的挑战' },
-  { level: 12, target: 3800, moves: 19, description: '五彩缤纷' },
-  { level: 13, target: 4200, moves: 19, description: '眼花缭乱' },
-  { level: 14, target: 4600, moves: 18, description: '心灵手巧' },
-  { level: 15, target: 5000, moves: 18, description: '百步穿杨' },
-  { level: 16, target: 5500, moves: 17, description: '稳扎稳打' },
-  { level: 17, target: 6000, moves: 17, description: '势如破竹' },
-  { level: 18, target: 6500, moves: 16, description: '游刃有余' },
-  { level: 19, target: 7000, moves: 16, description: '炉火纯青' },
-  { level: 20, target: 7500, moves: 15, description: '进阶达人' },
+  { level: 11, target: 3000, moves: 24, description: '新的挑战' },
+  { level: 12, target: 3300, moves: 23, description: '五彩缤纷' },
+  { level: 13, target: 3600, moves: 23, description: '眼花缭乱' },
+  { level: 14, target: 3900, moves: 22, description: '心灵手巧' },
+  { level: 15, target: 4200, moves: 22, description: '百步穿杨' },
+  { level: 16, target: 4600, moves: 21, description: '稳扎稳打' },
+  { level: 17, target: 5000, moves: 21, description: '势如破竹' },
+  { level: 18, target: 5400, moves: 20, description: '游刃有余' },
+  { level: 19, target: 5800, moves: 20, description: '炉火纯青' },
+  { level: 20, target: 6200, moves: 19, description: '进阶达人' },
   // 21-30: 中级
-  { level: 21, target: 8000, moves: 16, description: '中级开幕' },
-  { level: 22, target: 8500, moves: 15, description: '乘风破浪' },
-  { level: 23, target: 9000, moves: 15, description: '过关斩将' },
-  { level: 24, target: 9500, moves: 14, description: '一往无前' },
-  { level: 25, target: 10000, moves: 14, description: '半程英雄' },
-  { level: 26, target: 10500, moves: 14, description: '如日中天' },
-  { level: 27, target: 11000, moves: 13, description: '所向披靡' },
-  { level: 28, target: 11500, moves: 13, description: '锐不可当' },
-  { level: 29, target: 12000, moves: 13, description: '出类拔萃' },
-  { level: 30, target: 12500, moves: 12, description: '中级毕业' },
+  { level: 21, target: 6500, moves: 20, description: '中级开幕' },
+  { level: 22, target: 6900, moves: 19, description: '乘风破浪' },
+  { level: 23, target: 7300, moves: 19, description: '过关斩将' },
+  { level: 24, target: 7700, moves: 18, description: '一往无前' },
+  { level: 25, target: 8100, moves: 18, description: '半程英雄' },
+  { level: 26, target: 8500, moves: 17, description: '如日中天' },
+  { level: 27, target: 8900, moves: 17, description: '所向披靡' },
+  { level: 28, target: 9300, moves: 16, description: '锐不可当' },
+  { level: 29, target: 9700, moves: 16, description: '出类拔萃' },
+  { level: 30, target: 10000, moves: 16, description: '中级毕业' },
   // 31-40: 较难
-  { level: 31, target: 13000, moves: 13, description: '高手之路' },
-  { level: 32, target: 13500, moves: 12, description: '逆水行舟' },
-  { level: 33, target: 14000, moves: 12, description: '披荆斩棘' },
-  { level: 34, target: 14500, moves: 11, description: '千锤百炼' },
-  { level: 35, target: 15000, moves: 11, description: '炉火纯青' },
-  { level: 36, target: 15500, moves: 11, description: '高手过招' },
-  { level: 37, target: 16000, moves: 10, description: '棋逢对手' },
-  { level: 38, target: 16500, moves: 10, description: '九死一生' },
-  { level: 39, target: 17000, moves: 10, description: '凤毛麟角' },
-  { level: 40, target: 17500, moves: 9, description: '高手毕业' },
+  { level: 31, target: 10500, moves: 17, description: '高手之路' },
+  { level: 32, target: 11000, moves: 16, description: '逆水行舟' },
+  { level: 33, target: 11500, moves: 16, description: '披荆斩棘' },
+  { level: 34, target: 12000, moves: 15, description: '千锤百炼' },
+  { level: 35, target: 12500, moves: 15, description: '炉火纯青' },
+  { level: 36, target: 13000, moves: 15, description: '高手过招' },
+  { level: 37, target: 13500, moves: 14, description: '棋逢对手' },
+  { level: 38, target: 14000, moves: 14, description: '九死一生' },
+  { level: 39, target: 14500, moves: 13, description: '凤毛麟角' },
+  { level: 40, target: 15000, moves: 13, description: '高手毕业' },
   // 41-45: 偏难
-  { level: 41, target: 18000, moves: 10, description: '极限挑战' },
-  { level: 42, target: 18500, moves: 9, description: '绝处逢生' },
-  { level: 43, target: 19000, moves: 9, description: '背水一战' },
-  { level: 44, target: 19500, moves: 8, description: '殊死搏斗' },
-  { level: 45, target: 20000, moves: 8, description: '置之死地' },
+  { level: 41, target: 15300, moves: 14, description: '极限挑战' },
+  { level: 42, target: 15600, moves: 13, description: '绝处逢生' },
+  { level: 43, target: 16000, moves: 13, description: '背水一战' },
+  { level: 44, target: 16400, moves: 12, description: '殊死搏斗' },
+  { level: 45, target: 16800, moves: 12, description: '置之死地' },
   // 46-50: 最难
-  { level: 46, target: 20500, moves: 8, description: '王者之路' },
-  { level: 47, target: 21000, moves: 7, description: '至尊挑战' },
-  { level: 48, target: 21500, moves: 7, description: '巅峰对决' },
-  { level: 49, target: 22000, moves: 6, description: '传奇之巅' },
-  { level: 50, target: 23000, moves: 6, description: '消消乐之神' }
+  { level: 46, target: 17200, moves: 12, description: '王者之路' },
+  { level: 47, target: 17600, moves: 11, description: '至尊挑战' },
+  { level: 48, target: 18000, moves: 11, description: '巅峰对决' },
+  { level: 49, target: 18500, moves: 10, description: '传奇之巅' },
+  { level: 50, target: 19000, moves: 10, description: '消消乐之神' }
 ]
 
 export function useGameLogic() {
@@ -218,6 +218,16 @@ export function useGameLogic() {
         for (let r = 0; r < ROWS; r++) {
           eliminateSet.add(`${r},${targetCell.col}`)
         }
+      } else if (targetSpecial === 'area') {
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            const nr = targetCell.row + dr
+            const nc = targetCell.col + dc
+            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+              eliminateSet.add(`${nr},${nc}`)
+            }
+          }
+        }
       }
 
       // Also chain any line-clear specials caught in the elimination
@@ -236,6 +246,17 @@ export function useGameLogic() {
           for (let r = 0; r < ROWS; r++) {
             const k = `${r},${cc}`
             if (!processed.has(k)) { processed.add(k); eliminateSet.add(k); toProcess.push(k) }
+          }
+        } else if (chainCell.special === 'area' && !(cr === targetCell.row && cc === targetCell.col)) {
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              const nr = cr + dr
+              const nc = cc + dc
+              if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                const k = `${nr},${nc}`
+                if (!processed.has(k)) { processed.add(k); eliminateSet.add(k); toProcess.push(k) }
+              }
+            }
           }
         }
       }
@@ -423,6 +444,20 @@ export function useGameLogic() {
             toProcess.push({ row: r, col: cell.col })
           }
         }
+      } else if (gridCell.special === 'area') {
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            const nr = cell.row + dr
+            const nc = cell.col + dc
+            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+              const key = `${nr},${nc}`
+              if (!expanded.has(key)) {
+                expanded.add(key)
+                toProcess.push({ row: nr, col: nc })
+              }
+            }
+          }
+        }
       }
     }
 
@@ -434,23 +469,44 @@ export function useGameLogic() {
 
   function calculateScore(matchCount) {
     let base = 0
-    if (matchCount === 3) base = 30
-    else if (matchCount === 4) base = 60
-    else if (matchCount >= 5) base = 100
+    if (matchCount === 3) base = 40
+    else if (matchCount === 4) base = 80
+    else if (matchCount >= 5) base = 130
 
-    const comboMultiplier = comboCount.value > 0 ? 1.5 : 1
+    const comboMultiplier = comboCount.value > 0 ? 1.8 : 1
     return Math.floor(base * comboMultiplier)
   }
 
   async function processMatches(matches, groups, swapPos) {
     const specialSpawns = []
 
+    // Detect T/L-shape intersections for area special
+    const cellDirections = {}
     for (const group of groups) {
+      for (const cell of group.cells) {
+        const key = `${cell.row},${cell.col}`
+        if (!cellDirections[key]) cellDirections[key] = { h: false, v: false, fruit: group.fruit }
+        if (group.direction === 'horizontal') cellDirections[key].h = true
+        if (group.direction === 'vertical') cellDirections[key].v = true
+      }
+    }
+    const areaPositions = new Set()
+    for (const [key, dirs] of Object.entries(cellDirections)) {
+      if (dirs.h && dirs.v) {
+        const [r, c] = key.split(',').map(Number)
+        areaPositions.add(key)
+        specialSpawns.push({ row: r, col: c, special: 'area', fruit: dirs.fruit })
+      }
+    }
+
+    for (const group of groups) {
+      const spawnCell = pickSpawnPosition(group.cells, swapPos)
+      const spawnKey = `${spawnCell.row},${spawnCell.col}`
+      if (areaPositions.has(spawnKey)) continue
+
       if (group.length >= 5) {
-        const spawnCell = pickSpawnPosition(group.cells, swapPos)
         specialSpawns.push({ ...spawnCell, special: 'bomb', fruit: '💫' })
       } else if (group.length === 4) {
-        const spawnCell = pickSpawnPosition(group.cells, swapPos)
         specialSpawns.push({
           ...spawnCell,
           special: group.direction === 'horizontal' ? 'line-h' : 'line-v',
@@ -635,7 +691,7 @@ export function useGameLogic() {
 
   function scheduleRandomSpecial() {
     if (gameStatus.value !== 'playing') return
-    const interval = 8000 + Math.random() * 12000
+    const interval = 5000 + Math.random() * 8000
     specialSpawnTimer.value = setTimeout(() => {
       trySpawnRandomSpecial()
       scheduleRandomSpecial()
@@ -644,7 +700,7 @@ export function useGameLogic() {
 
   function trySpawnRandomSpecial() {
     if (gameStatus.value !== 'playing' || isProcessing.value) return
-    if (movesSinceLastSpecial.value < 3) return
+    if (movesSinceLastSpecial.value < 2) return
 
     const normalCells = []
     for (let r = 0; r < ROWS; r++) {
@@ -659,10 +715,12 @@ export function useGameLogic() {
     const target = normalCells[Math.floor(Math.random() * normalCells.length)]
     const rand = Math.random()
     let specialType
-    if (rand < 0.35) {
+    if (rand < 0.28) {
       specialType = 'line-h'
-    } else if (rand < 0.7) {
+    } else if (rand < 0.56) {
       specialType = 'line-v'
+    } else if (rand < 0.80) {
+      specialType = 'area'
     } else {
       specialType = 'bomb'
     }

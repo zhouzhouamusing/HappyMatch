@@ -30,7 +30,7 @@ public class AuthController {
 
         Map<String, Object> body = new HashMap<>();
         body.put("success", true);
-        body.put("data", Map.of("id", user.getId(), "username", user.getUsername()));
+        body.put("data", buildUserData(user));
         return ResponseEntity.ok(body);
     }
 
@@ -47,13 +47,12 @@ public class AuthController {
 
         Map<String, Object> body = new HashMap<>();
         body.put("success", true);
-        body.put("data", Map.of("id", user.getId(), "username", user.getUsername()));
+        body.put("data", buildUserData(user));
         return ResponseEntity.ok(body);
     }
 
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> me(HttpSession session) {
-        // AuthFilter already guarantees userId is present for protected endpoints
         Long userId = (Long) session.getAttribute("userId");
         User user = userService.findById(userId).orElse(null);
         if (user == null) {
@@ -67,7 +66,18 @@ public class AuthController {
 
         Map<String, Object> body = new HashMap<>();
         body.put("success", true);
-        body.put("data", Map.of("id", user.getId(), "username", user.getUsername()));
+        body.put("data", buildUserData(user));
+        return ResponseEntity.ok(body);
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<Map<String, Object>> updateProfile(@RequestBody Map<String, String> request, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        User user = userService.updateProfile(userId, request.get("nickname"), request.get("avatar"));
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", true);
+        body.put("data", buildUserData(user));
         return ResponseEntity.ok(body);
     }
 
@@ -96,5 +106,14 @@ public class AuthController {
         body.put("success", true);
         body.put("message", "密码重置成功，请使用新密码登录");
         return ResponseEntity.ok(body);
+    }
+
+    private Map<String, Object> buildUserData(User user) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", user.getId());
+        data.put("username", user.getUsername());
+        data.put("nickname", user.getNickname());
+        data.put("avatar", user.getAvatar());
+        return data;
     }
 }

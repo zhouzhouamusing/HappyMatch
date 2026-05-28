@@ -81,6 +81,12 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem(CREDENTIAL_KEY)
   }
 
+  async function updateProfile(nickname, avatar) {
+    const res = await api.put('/api/auth/profile', { nickname, avatar })
+    user.value = res.data.data
+    return res.data.data
+  }
+
   return {
     user,
     login,
@@ -90,6 +96,7 @@ export const useUserStore = defineStore('user', () => {
     getSecurityQuestion,
     resetPassword,
     getRememberedCredentials,
-    clearRememberedCredentials
+    clearRememberedCredentials,
+    updateProfile
   }
 })

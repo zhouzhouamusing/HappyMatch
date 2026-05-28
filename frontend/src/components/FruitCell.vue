@@ -9,6 +9,8 @@
     <span v-if="cell.special === 'line-v'" class="special-overlay line-v-overlay"></span>
     <span v-if="cell.special === 'line-h'" class="direction-icon direction-h">⟷</span>
     <span v-if="cell.special === 'line-v'" class="direction-icon direction-v">⟷</span>
+    <span v-if="cell.special === 'area'" class="special-overlay area-overlay"></span>
+    <span v-if="cell.special === 'area'" class="direction-icon direction-area">✦</span>
   </div>
 </template>
 
@@ -91,5 +93,22 @@ const cellStyle = computed(() => {
   transform: rotate(90deg);
   color: #2563eb;
   text-shadow: 0 0 3px rgba(59, 130, 246, 0.8);
+}
+
+.area-overlay {
+  width: 80%;
+  height: 80%;
+  border: 2px dashed rgba(16, 185, 129, 0.6);
+  border-radius: 4px;
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
+}
+
+.direction-area {
+  bottom: 1px;
+  right: 2px;
+  color: #059669;
+  font-size: 11px;
+  font-weight: 900;
+  text-shadow: 0 0 4px rgba(16, 185, 129, 0.8);
 }
 </style>

@@ -16,7 +16,7 @@
           <span v-for="i in 3" :key="i" class="star" :class="{ filled: getStars() >= i }">⭐</span>
         </div>
         <div v-if="type === 'won' && coinsEarned > 0" class="coins-reward">
-          <span class="coins-reward-icon">🪙</span>
+          <span class="coins-reward-icon-styled"></span>
           <span class="coins-reward-text">+{{ coinsEarned }} 金币</span>
         </div>
         <div class="modal-actions">
@@ -189,8 +189,31 @@ function getStars() {
   100% { transform: scale(1); opacity: 1; }
 }
 
-.coins-reward-icon {
-  font-size: 18px;
+.coins-reward-icon-styled {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffd700, #f5a623);
+  border: 2px solid #d4920a;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.2),
+              inset 0 2px 4px rgba(255,255,255,0.4),
+              0 2px 6px rgba(245, 166, 35, 0.4);
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.coins-reward-icon-styled::after {
+  content: '$';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  color: #8B6914;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.3);
 }
 
 .coins-reward-text {
