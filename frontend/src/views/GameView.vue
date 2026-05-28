@@ -991,18 +991,19 @@ async function handleSaveProfile({ nickname, avatar }) {
 
 .exit-confirm-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 12px;
   animation: fadeInUp 0.4s ease-out 0.5s both;
 }
 
 .btn-primary {
+  flex: 1;
   padding: 14px 20px;
   border-radius: 14px;
   background: linear-gradient(135deg, #a78bfa, #7c3aed);
   color: white;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   border: none;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1020,11 +1021,12 @@ async function handleSaveProfile({ nickname, avatar }) {
 }
 
 .btn-secondary {
-  padding: 12px 20px;
+  flex: 1;
+  padding: 14px 20px;
   border-radius: 14px;
   background: linear-gradient(135deg, #fff7ed, #ffedd5);
   border: 1.5px solid #fed7aa;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #c2410c;
   cursor: pointer;
@@ -1032,7 +1034,7 @@ async function handleSaveProfile({ nickname, avatar }) {
 }
 
 .btn-secondary:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   border-color: #fb923c;
   background: linear-gradient(135deg, #ffedd5, #fed7aa);
   box-shadow: 0 4px 12px rgba(251, 146, 60, 0.2);
